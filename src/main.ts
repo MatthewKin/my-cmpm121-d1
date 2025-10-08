@@ -4,7 +4,6 @@ import "./style.css";
 document.body.innerHTML = `
   <p>Example image asset: <img src="${exampleIconUrl}" class="icon" /></p>
 `;
-document.body.innerHTML = "<h1>I can see the text yippee</h1>";
 
 const button = document.createElement("button");
 button.textContent = "Talk to The Website";

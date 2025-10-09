@@ -3,6 +3,12 @@ import "./style.css";
 // 👇 State
 let counter: number = 0;
 
+// Automatically increase counter every second
+setInterval(() => {
+  counter++;
+  counterDisplay.textContent = `${counter} paperclips`;
+}, 1000);
+
 // Add this to control overall page layout
 document.body.style.margin = "0";
 document.body.style.display = "flex";

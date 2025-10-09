@@ -1,15 +1,24 @@
 import "./style.css";
 
-// 👇 State
+// =============================================================================
+// STATE
+// =============================================================================
+
 let counter: number = 0;
+let growthRate: number = 0; // stars per second
+let lastTime: number = performance.now();
 
-// Growth rate (1 unit per second)
-const growthRate = 1;
+// =============================================================================
+// CONFIG
+// =============================================================================
 
-// Keep track of the last timestamp
-let lastTime = performance.now();
+const UPGRADE_COST = 10;
+const UPGRADE_RATE = 1;
 
-// Add this to control overall page layout
+// =============================================================================
+// PAGE LAYOUT SETUP
+// =============================================================================
+
 document.body.style.margin = "0";
 document.body.style.display = "flex";
 document.body.style.flexDirection = "column";
@@ -18,41 +27,72 @@ document.body.style.alignItems = "center";
 document.body.style.minHeight = "100vh";
 document.body.style.fontFamily = "Arial, sans-serif";
 
-// Create display div
+// =============================================================================
+// DOM ELEMENTS
+// =============================================================================
+
 const counterDisplay = document.createElement("div");
 counterDisplay.style.fontSize = "24px";
 counterDisplay.style.textAlign = "center";
-
-counterDisplay.textContent = `${counter.toFixed(2)} stars`;
 document.body.appendChild(counterDisplay);
 
-// Create the button
-const button = document.createElement("button");
-button.innerHTML = `⭐️ Click for more stars!`;
-button.style.padding = "12px 24px";
-button.style.fontSize = "16px";
-document.body.appendChild(button);
+const clickButton = document.createElement("button");
+clickButton.innerHTML = `⭐️ Click for more stars!`;
+clickButton.style.padding = "12px 24px";
+clickButton.style.fontSize = "16px";
+document.body.appendChild(clickButton);
 
-// Update counter on click
-button.addEventListener("click", () => {
+const buyButton = document.createElement("button");
+buyButton.textContent = `Buy Auto-Clicker (${UPGRADE_COST} stars)`;
+buyButton.style.marginTop = "10px";
+buyButton.style.padding = "10px 16px";
+buyButton.style.fontSize = "16px";
+buyButton.disabled = true; // Start disabled
+document.body.appendChild(buyButton);
+
+// =============================================================================
+// UPDATE LOGIC
+// =============================================================================
+
+const updateDisplay = (): void => {
+  counterDisplay.textContent = `${counter.toFixed(2)} stars (${
+    growthRate.toFixed(2)
+  } stars/sec)`;
+  buyButton.disabled = counter < UPGRADE_COST;
+};
+
+// Handle manual click
+clickButton.addEventListener("click", () => {
   counter++;
-  counterDisplay.textContent = `${counter.toFixed(2)} stars`;
+  updateDisplay();
 });
 
-// 👇 Continuous growth using requestAnimationFrame
-function update(currentTime: number) {
-  const deltaTime = (currentTime - lastTime) / 1000; // convert ms → seconds
+// Handle upgrade purchase
+buyButton.addEventListener("click", () => {
+  if (counter >= UPGRADE_COST) {
+    counter -= UPGRADE_COST;
+    growthRate += UPGRADE_RATE;
+    updateDisplay();
+  }
+});
+
+// =============================================================================
+// GAME LOOP (requestAnimationFrame)
+// =============================================================================
+
+const gameLoop = (currentTime: number): void => {
+  const deltaTime = (currentTime - lastTime) / 1000; // seconds
   lastTime = currentTime;
 
-  // Increase counter based on time passed
   counter += growthRate * deltaTime;
+  updateDisplay();
 
-  // Update display
-  counterDisplay.textContent = `${counter.toFixed(2)} stars`;
+  requestAnimationFrame(gameLoop);
+};
 
-  // Request next frame
-  requestAnimationFrame(update);
-}
+// =============================================================================
+// INITIALIZATION
+// =============================================================================
 
-// Start animation loop
-requestAnimationFrame(update);
+updateDisplay(); // Initial render
+requestAnimationFrame(gameLoop);

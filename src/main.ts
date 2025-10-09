@@ -4,7 +4,7 @@ import "./style.css";
 let counter: number = 0;
 
 // Growth rate (1 unit per second)
-let growthRate = 1;
+const growthRate = 1;
 
 // Keep track of the last timestamp
 let lastTime = performance.now();

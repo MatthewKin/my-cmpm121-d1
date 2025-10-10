@@ -1,7 +1,7 @@
 import "./style.css";
 
 // =============================================================================
-// STATE
+// STATE (PEE PEE POO POO)
 // =============================================================================
 
 let counter: number = 0;
@@ -9,14 +9,14 @@ let growthRate: number = 0; // stars per second
 let lastTime: number = performance.now();
 
 // =============================================================================
-// CONFIG
+// CONFIG  (PEE PEE POO POO)
 // =============================================================================
 
 const UPGRADE_COST = 10;
 const UPGRADE_RATE = 1;
 
 // =============================================================================
-// PAGE LAYOUT SETUP
+// PAGE LAYOUT SETUP  (PEE PEE POO POO)
 // =============================================================================
 
 document.body.style.margin = "0";
@@ -28,7 +28,7 @@ document.body.style.minHeight = "100vh";
 document.body.style.fontFamily = "Arial, sans-serif";
 
 // =============================================================================
-// DOM ELEMENTS
+// DOM ELEMENTS  (PEE PEE POO POO)
 // =============================================================================
 
 const counterDisplay = document.createElement("div");
@@ -51,7 +51,7 @@ buyButton.disabled = true; // Start disabled
 document.body.appendChild(buyButton);
 
 // =============================================================================
-// UPDATE LOGIC
+// UPDATE LOGIC  (PEE PEE POO POO)
 // =============================================================================
 
 const updateDisplay = (): void => {
@@ -77,7 +77,7 @@ buyButton.addEventListener("click", () => {
 });
 
 // =============================================================================
-// GAME LOOP (requestAnimationFrame)
+// GAME LOOP (requestAnimationFrame)  (PEE PEE POO POO)
 // =============================================================================
 
 const gameLoop = (currentTime: number): void => {
@@ -91,7 +91,7 @@ const gameLoop = (currentTime: number): void => {
 };
 
 // =============================================================================
-// INITIALIZATION
+// INITIALIZATION  (PEE PEE POO POO)
 // =============================================================================
 
 updateDisplay(); // Initial render

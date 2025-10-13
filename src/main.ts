@@ -90,7 +90,7 @@ bgMusic.loop = true;
 bgMusic.volume = 0.3;
 
 // Try to autoplay
-window.addEventListener("load", () => {
+globalThis.addEventListener("load", () => {
   bgMusic.play().catch(() => {
     console.log("Autoplay blocked; music will start after first click.");
   });
@@ -209,7 +209,7 @@ const spawnShootingStar = (): void => {
   const star = document.createElement("div");
   star.textContent = "⭐";
   star.style.position = "fixed";
-  star.style.left = `${Math.random() * window.innerWidth}px`;
+  star.style.left = `${Math.random() * globalThis.innerWidth}px`;
   star.style.top = `${Math.random() * 100}px`;
   star.style.fontSize = `${24 + Math.random() * 6}px`;
   star.style.opacity = "0.8";
@@ -219,7 +219,7 @@ const spawnShootingStar = (): void => {
   document.body.appendChild(star);
 
   const endX = Math.random() * 200 - 100;
-  const endY = window.innerHeight + 50;
+  const endY = globalThis.innerHeight + 50;
 
   requestAnimationFrame(() => {
     star.style.transform = `translate(${endX}px, ${endY}px) rotate(45deg)`;

@@ -7,8 +7,9 @@ import "./style.css";
 let counter: number = 0;
 let growthRate: number = 0; // stars per second
 let lastTime: number = performance.now();
+let lastStarBatch: number = 0; // 🌠 tracks last milestone batch (e.g., 320)
+let lastSpawnCheck: number = performance.now(); // 🌠 last time we checked for stars
 
-//
 type Upgrade = {
   name: string;
   cost: number;
@@ -92,6 +93,36 @@ upgrades.forEach((upgrade) => {
 });
 
 // =============================================================================
+// SHOOTING STAR EFFECT 🌠
+// =============================================================================
+
+const spawnShootingStar = (): void => {
+  const star = document.createElement("div");
+  star.textContent = "⭐";
+  star.style.position = "fixed";
+  star.style.left = `${Math.random() * window.innerWidth}px`;
+  star.style.top = `${Math.random() * 100}px`;
+  star.style.fontSize = `${24 + Math.random() * 6}px`;
+  star.style.opacity = "0.8";
+  star.style.pointerEvents = "none";
+  star.style.transition = "transform 1s linear, opacity 1s ease-out";
+
+  document.body.appendChild(star);
+
+  // Random diagonal direction
+  const endX = Math.random() * 200 - 100;
+  const endY = window.innerHeight + 50;
+
+  requestAnimationFrame(() => {
+    star.style.transform = `translate(${endX}px, ${endY}px) rotate(45deg)`;
+    star.style.opacity = "0";
+  });
+
+  // Remove after animation
+  setTimeout(() => star.remove(), 1000);
+};
+
+// =============================================================================
 // UPDATE LOGIC  (PEE PEE POO POO)
 // =============================================================================
 
@@ -115,13 +146,17 @@ clickButton.addEventListener("click", () => {
   updateDisplay();
 });
 
-// Handle upgrade purchase
+// Handle upgrade purchase (with price increase)
 upgrades.forEach((u) => {
   u.button?.addEventListener("click", () => {
     if (counter >= u.cost) {
       counter -= u.cost;
       u.count++;
       growthRate += u.rate;
+
+      // 💸 Increase cost by 15% after each purchase
+      u.cost = parseFloat((u.cost * 1.15).toFixed(2));
+
       updateDisplay();
     }
   });
@@ -135,9 +170,33 @@ const gameLoop = (currentTime: number): void => {
   const deltaTime = (currentTime - lastTime) / 1000; // seconds
   lastTime = currentTime;
 
+  // Passive growth
   counter += growthRate * deltaTime;
-  updateDisplay();
 
+  // 🌠 Check for shooting stars every second
+  if (currentTime - lastSpawnCheck >= 1000) {
+    lastSpawnCheck = currentTime;
+
+    // Calculate how many stars to spawn based on current total
+    const starsToSpawn = Math.floor(counter / 5);
+
+    console.log(
+      `[DEBUG] ${new Date().toLocaleTimeString()} → ${
+        counter.toFixed(
+          2,
+        )
+      } stars → spawning ${starsToSpawn} shooting stars`,
+    );
+
+    for (let i = 0; i < starsToSpawn; i++) {
+      setTimeout(() => {
+        console.log(`[DEBUG] Shooting star #${i + 1} fired correctly`);
+        spawnShootingStar();
+      }, i * 100); // small delay for cascade effect
+    }
+  }
+
+  updateDisplay();
   requestAnimationFrame(gameLoop);
 };
 

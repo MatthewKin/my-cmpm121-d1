@@ -7,7 +7,6 @@ import "./style.css";
 let counter: number = 0;
 let growthRate: number = 0; // stars per second
 let lastTime: number = performance.now();
-let lastStarBatch: number = 0; // 🌠 tracks last milestone batch (e.g., 320)
 let lastSpawnCheck: number = performance.now(); // 🌠 last time we checked for stars
 
 type Upgrade = {
@@ -19,9 +18,9 @@ type Upgrade = {
 };
 
 const upgrades: Upgrade[] = [
-  { name: "Satellite Array 🛰️", cost: 10, rate: 0.1, count: 0 },
-  { name: "Nova Beacon ✨", cost: 100, rate: 2.0, count: 0 },
-  { name: "Galaxy 🌌", cost: 1000, rate: 50, count: 0 },
+  { name: "Satellite Array 🛰️", cost: 10, rate: 1, count: 0 },
+  { name: "Nova Beacon ✨", cost: 100, rate: 5, count: 0 },
+  { name: "Galaxy 🌌", cost: 1000, rate: 100, count: 0 },
 ];
 
 // =============================================================================
@@ -68,10 +67,48 @@ growthDisplay.style.marginBottom = "12px";
 document.body.appendChild(growthDisplay);
 
 const clickButton = document.createElement("button");
-clickButton.innerHTML = `⭐️ Click for Stardust!`;
-clickButton.style.padding = "12px 24px";
-clickButton.style.fontSize = "16px";
+clickButton.style.border = "none";
+clickButton.style.background = "transparent";
+clickButton.style.padding = "0";
 clickButton.style.marginBottom = "16px";
+clickButton.style.cursor = "pointer";
+
+const buttonImage = document.createElement("img");
+buttonImage.src = "./assets/star_button.png"; // path to your image
+buttonImage.alt = "Click to collect stardust";
+buttonImage.style.width = "800px"; // adjust size
+buttonImage.style.height = "200px";
+buttonImage.style.objectFit = "contain";
+buttonImage.style.transition = "transform 0.1s ease";
+clickButton.addEventListener(
+  "mouseover",
+  () => buttonImage.style.transform = "scale(1.1)",
+);
+clickButton.addEventListener(
+  "mouseout",
+  () => buttonImage.style.transform = "scale(1)",
+);
+clickButton.addEventListener("mouseover", () => {
+  buttonImage.style.filter = "brightness(70%)"; // darker
+});
+clickButton.addEventListener("mouseout", () => {
+  buttonImage.style.filter = "brightness(100%)"; // normal
+});
+
+clickButton.addEventListener("mousedown", () => {
+  buttonImage.style.transform = "scale(0.95)"; // shrink slightly
+  buttonImage.style.filter = "brightness(50%)"; // darken more
+});
+clickButton.addEventListener("mouseup", () => {
+  buttonImage.style.transform = "scale(1)";
+  buttonImage.style.filter = "brightness(70%)"; // restore hover brightness
+});
+clickButton.addEventListener("mouseleave", () => { // in case mouse leaves while pressed
+  buttonImage.style.transform = "scale(1)";
+  buttonImage.style.filter = "brightness(100%)";
+});
+
+clickButton.appendChild(buttonImage);
 document.body.appendChild(clickButton);
 
 // Container for upgrade buttons
@@ -127,8 +164,8 @@ const spawnShootingStar = (): void => {
 // =============================================================================
 
 const updateDisplay = (): void => {
-  counterDisplay.textContent = `${counter.toFixed(2)} stars (${
-    growthRate.toFixed(2)
+  counterDisplay.textContent = `${counter.toFixed(1)} stars (${
+    growthRate.toFixed(1)
   } stars/sec)`;
 
   upgrades.forEach((u) => {
@@ -174,17 +211,19 @@ const gameLoop = (currentTime: number): void => {
   counter += growthRate * deltaTime;
 
   // 🌠 Check for shooting stars every second
+  // 🌠 Check for shooting stars every second
   if (currentTime - lastSpawnCheck >= 1000) {
     lastSpawnCheck = currentTime;
 
     // Calculate how many stars to spawn based on current total
-    const starsToSpawn = Math.floor(counter / 5);
+    let starsToSpawn = Math.floor(counter / 10);
+
+    // Cap at 100
+    if (starsToSpawn > 100) starsToSpawn = 100;
 
     console.log(
       `[DEBUG] ${new Date().toLocaleTimeString()} → ${
-        counter.toFixed(
-          2,
-        )
+        counter.toFixed(2)
       } stars → spawning ${starsToSpawn} shooting stars`,
     );
 

@@ -38,7 +38,7 @@ const availableItems: Item[] = [
     cost: 1000,
     rate: 100,
     count: 0,
-    description: "Harnesses the power of an entire galaxy!",
+    description: "An entire galaxy at the palm of your hand.",
   },
   {
     name: "Nebula Engine 🌠",
@@ -80,6 +80,26 @@ document.body.animate(
   ],
   { duration: 2000, iterations: Infinity },
 );
+
+// =============================================================================
+// MUSIC
+// =============================================================================
+
+const bgMusic = new Audio("./assets/music.mp3"); // Replace with your music file path
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
+
+// Try to autoplay
+window.addEventListener("load", () => {
+  bgMusic.play().catch(() => {
+    console.log("Autoplay blocked; music will start after first click.");
+  });
+});
+
+// Optional: play music on first click if autoplay blocked
+document.body.addEventListener("click", () => {
+  if (bgMusic.paused) bgMusic.play();
+}, { once: true });
 
 // =============================================================================
 // DOM ELEMENTS
@@ -162,8 +182,8 @@ document.body.appendChild(upgradeContainer);
 availableItems.forEach((item) => {
   const btn = document.createElement("button");
   btn.style.margin = "6px";
-  btn.style.width = "300px";
-  btn.style.minWidth = "300px";
+  btn.style.width = "420px";
+  btn.style.minWidth = "420px";
   btn.style.padding = "10px 16px";
   btn.style.fontSize = "16px";
   btn.disabled = true;
@@ -221,32 +241,37 @@ const updateDisplay = (): void => {
   availableItems.forEach((item) => {
     if (item.button) {
       item.button.disabled = counter < item.cost;
+      // Include description directly in the button
       item.button.textContent = `Buy ${item.name} (${
         item.cost.toFixed(1)
-      } stars) — Owned: ${item.count}`;
-      item.button.title = item.description; // Show description on hover
+      } stars) — Owned: ${item.count}\n${item.description}`;
+      item.button.style.whiteSpace = "pre-wrap"; // allow line breaks
+      item.button.style.textAlign = "center";
     }
   });
 };
 
 // =============================================================================
-// GAME LOOP
+// GAME LOOP (with star/sec-based shooting stars)
 // =============================================================================
 
 const gameLoop = (currentTime: number): void => {
   const deltaTime = (currentTime - lastTime) / 1000;
   lastTime = currentTime;
 
+  // Passive growth
   counter += growthRate * deltaTime;
 
-  if (currentTime - lastSpawnCheck >= 1000) {
+  // 🌠 Shooting stars spawn based on growthRate (stars/sec)
+  if (currentTime - lastSpawnCheck >= 2000) {
     lastSpawnCheck = currentTime;
 
-    let starsToSpawn = Math.floor(counter / 10);
-    if (starsToSpawn > 100) starsToSpawn = 100;
+    // Number of shooting stars per second = growthRate, capped at 80
+    let starsToSpawn = Math.floor(growthRate);
+    if (starsToSpawn > 80) starsToSpawn = 80;
 
     for (let i = 0; i < starsToSpawn; i++) {
-      setTimeout(spawnShootingStar, i * 100);
+      setTimeout(spawnShootingStar, i * 100); // cascade effect
     }
   }
 

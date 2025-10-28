@@ -11,7 +11,7 @@ let lastSpawnCheck: number = performance.now(); // 🌠 last time we checked for
 
 interface Item {
   name: string;
-  cost: number;
+  purchaseCost: number;
   rate: number;
   count: number;
   description: string;
@@ -21,35 +21,35 @@ interface Item {
 const availableItems: Item[] = [
   {
     name: "Satellite Array 🛰️",
-    cost: 10,
+    purchaseCost: 10,
     rate: 1,
     count: 0,
     description: "A basic array to collect stardust automatically.",
   },
   {
     name: "Nova Beacon ✨",
-    cost: 100,
+    purchaseCost: 100,
     rate: 5,
     count: 0,
     description: "Shines brightly to speed up stardust collection.",
   },
   {
     name: "Galaxy 🌌",
-    cost: 1000,
+    purchaseCost: 1000,
     rate: 100,
     count: 0,
     description: "An entire galaxy at the palm of your hand.",
   },
   {
     name: "Nebula Engine 🌠",
-    cost: 5000,
+    purchaseCost: 5000,
     rate: 500,
     count: 0,
     description: "A massive engine fueled by nebulae.",
   },
   {
     name: "Celestial Throne 👑",
-    cost: 20000,
+    purchaseCost: 20000,
     rate: 2000,
     count: 0,
     description: "Rule the cosmos and gain stardust rapidly.",
@@ -57,9 +57,31 @@ const availableItems: Item[] = [
 ];
 
 // =============================================================================
-// PAGE LAYOUT SETUP
+// UPDATE LOGIC
 // =============================================================================
 
+const updateDisplay = (): void => {
+  counterDisplay.textContent = `${counter.toFixed(1)} stars (${
+    growthRate.toFixed(1)
+  } stars/sec)`;
+
+  availableItems.forEach((item) => {
+    if (item.button) {
+      item.button.disabled = counter < item.purchaseCost;
+      item.button.textContent = `Buy ${item.name} (${
+        item.purchaseCost.toFixed(1)
+      } stars) — Owned: ${item.count}\n${item.description}`;
+      item.button.style.whiteSpace = "pre-wrap";
+      item.button.style.textAlign = "center";
+    }
+  });
+};
+
+// =============================================================================
+// DOM & PAGE SETUP
+// =============================================================================
+
+// Body styling
 document.body.style.margin = "0";
 document.body.style.display = "flex";
 document.body.style.flexDirection = "column";
@@ -71,7 +93,6 @@ document.body.style.color = "white";
 document.body.style.background =
   "linear-gradient(270deg, #1b003a, #240046, #3c096c)";
 document.body.style.backgroundSize = "600% 600%";
-
 document.body.animate(
   [
     { backgroundPosition: "0% 50%" },
@@ -81,30 +102,7 @@ document.body.animate(
   { duration: 2000, iterations: Infinity },
 );
 
-// =============================================================================
-// MUSIC
-// =============================================================================
-
-const bgMusic = new Audio("./assets/music.mp3"); // Replace with your music file path
-bgMusic.loop = true;
-bgMusic.volume = 0.3;
-
-// Try to autoplay
-globalThis.addEventListener("load", () => {
-  bgMusic.play().catch(() => {
-    console.log("Autoplay blocked; music will start after first click.");
-  });
-});
-
-// Optional: play music on first click if autoplay blocked
-document.body.addEventListener("click", () => {
-  if (bgMusic.paused) bgMusic.play();
-}, { once: true });
-
-// =============================================================================
-// DOM ELEMENTS
-// =============================================================================
-
+// Counter & growth display
 const counterDisplay = document.createElement("div");
 counterDisplay.style.fontSize = "24px";
 counterDisplay.style.textAlign = "center";
@@ -116,7 +114,7 @@ growthDisplay.style.textAlign = "center";
 growthDisplay.style.marginBottom = "12px";
 document.body.appendChild(growthDisplay);
 
-// Clickable image button
+// Click button
 const clickButton = document.createElement("button");
 clickButton.style.border = "none";
 clickButton.style.background = "transparent";
@@ -132,7 +130,39 @@ buttonImage.style.height = "200px";
 buttonImage.style.objectFit = "contain";
 buttonImage.style.transition = "transform 0.1s ease, filter 0.1s ease";
 
-// Hover and click effects
+clickButton.appendChild(buttonImage);
+document.body.appendChild(clickButton);
+
+// Upgrade buttons container
+const upgradeContainer = document.createElement("div");
+upgradeContainer.style.display = "flex";
+upgradeContainer.style.flexDirection = "column";
+upgradeContainer.style.alignItems = "center";
+document.body.appendChild(upgradeContainer);
+
+// =============================================================================
+// MUSIC
+// =============================================================================
+
+const bgMusic = new Audio("./assets/music.mp3");
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
+
+globalThis.addEventListener("load", () => {
+  bgMusic.play().catch(() => {
+    console.log("Autoplay blocked; music will start after first click.");
+  });
+});
+
+document.body.addEventListener("click", () => {
+  if (bgMusic.paused) bgMusic.play();
+}, { once: true });
+
+// =============================================================================
+// EVENT LISTENERS
+// =============================================================================
+
+// Click button effects
 clickButton.addEventListener(
   "mouseover",
   () => buttonImage.style.transform = "scale(1.1)",
@@ -168,17 +198,7 @@ clickButton.addEventListener("click", () => {
   updateDisplay();
 });
 
-clickButton.appendChild(buttonImage);
-document.body.appendChild(clickButton);
-
-// Container for item buttons
-const upgradeContainer = document.createElement("div");
-upgradeContainer.style.display = "flex";
-upgradeContainer.style.flexDirection = "column";
-upgradeContainer.style.alignItems = "center";
-document.body.appendChild(upgradeContainer);
-
-// Create buttons for all items dynamically
+// Upgrade buttons
 availableItems.forEach((item) => {
   const btn = document.createElement("button");
   btn.style.margin = "6px";
@@ -191,18 +211,18 @@ availableItems.forEach((item) => {
   upgradeContainer.appendChild(btn);
 
   btn.addEventListener("click", () => {
-    if (counter >= item.cost) {
-      counter -= item.cost;
+    if (counter >= item.purchaseCost) {
+      counter -= item.purchaseCost;
       item.count++;
       growthRate += item.rate;
-      item.cost = parseFloat((item.cost * 1.15).toFixed(2));
+      item.purchaseCost = parseFloat((item.purchaseCost * 1.15).toFixed(2));
       updateDisplay();
     }
   });
 });
 
 // =============================================================================
-// SHOOTING STAR EFFECT 🌠
+// SHOOTING STAR EFFECT
 // =============================================================================
 
 const spawnShootingStar = (): void => {
@@ -230,48 +250,23 @@ const spawnShootingStar = (): void => {
 };
 
 // =============================================================================
-// UPDATE DISPLAY
-// =============================================================================
-
-const updateDisplay = (): void => {
-  counterDisplay.textContent = `${counter.toFixed(1)} stars (${
-    growthRate.toFixed(1)
-  } stars/sec)`;
-
-  availableItems.forEach((item) => {
-    if (item.button) {
-      item.button.disabled = counter < item.cost;
-      // Include description directly in the button
-      item.button.textContent = `Buy ${item.name} (${
-        item.cost.toFixed(1)
-      } stars) — Owned: ${item.count}\n${item.description}`;
-      item.button.style.whiteSpace = "pre-wrap"; // allow line breaks
-      item.button.style.textAlign = "center";
-    }
-  });
-};
-
-// =============================================================================
-// GAME LOOP (with star/sec-based shooting stars)
+// GAME LOOP
 // =============================================================================
 
 const gameLoop = (currentTime: number): void => {
   const deltaTime = (currentTime - lastTime) / 1000;
   lastTime = currentTime;
 
-  // Passive growth
   counter += growthRate * deltaTime;
 
-  // 🌠 Shooting stars spawn based on growthRate (stars/sec)
   if (currentTime - lastSpawnCheck >= 2000) {
     lastSpawnCheck = currentTime;
 
-    // Number of shooting stars per second = growthRate, capped at 80
     let starsToSpawn = Math.floor(growthRate);
     if (starsToSpawn > 80) starsToSpawn = 80;
 
     for (let i = 0; i < starsToSpawn; i++) {
-      setTimeout(spawnShootingStar, i * 100); // cascade effect
+      setTimeout(spawnShootingStar, i * 100);
     }
   }
 

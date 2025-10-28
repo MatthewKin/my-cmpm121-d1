@@ -258,11 +258,10 @@ const spawnShootingStar = (): void => {
 
   document.body.appendChild(star);
 
-  const endX = Math.random() * 200 - 100;
-  const endY = globalThis.innerHeight + 50;
-
   requestAnimationFrame(() => {
-    star.style.transform = `translate(${endX}px, ${endY}px) rotate(45deg)`;
+    star.style.transform = `translate(${Math.random() * 200 - 100}px, ${
+      globalThis.innerHeight + 50
+    }px) rotate(45deg)`;
     star.style.opacity = "0";
   });
 

@@ -7,6 +7,7 @@ let counter = 0;
 let growthRate = 0;
 let lastTime = performance.now();
 let lastSpawnCheck = performance.now();
+let starsToSpawn;
 
 interface Item {
   name: string;
@@ -229,7 +230,7 @@ const gameLoop = (time: number): void => {
 
   if (time - lastSpawnCheck >= 2000) {
     lastSpawnCheck = time;
-    let starsToSpawn = Math.min(Math.floor(growthRate), 80);
+    starsToSpawn = Math.min(Math.floor(growthRate), 80);
     for (let i = 0; i < starsToSpawn; i++) {
       setTimeout(spawnShootingStar, i * 100);
     }

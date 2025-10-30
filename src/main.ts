@@ -1,22 +1,13 @@
 import "./style.css";
 
-// ──────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // STATE
-// ──────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+let counter = 0;
+let growthRate = 0;
+let lastTime = performance.now();
+let lastSpawnCheck = performance.now();
 
-// Current number of stars collected
-let counter: number = 0;
-
-// Passive growth rate (stars per second)
-let growthRate: number = 0;
-
-// Track last time for delta calculations
-let lastTime: number = performance.now();
-
-// Track last time shooting stars were spawned
-let lastSpawnCheck: number = performance.now();
-
-// Item interface representing purchasable upgrades
 interface Item {
   name: string;
   purchaseCost: number;
@@ -26,7 +17,6 @@ interface Item {
   button?: HTMLButtonElement;
 }
 
-// All available upgrade items in the game
 const availableItems: Item[] = [
   {
     name: "Satellite Array 🛰️",
@@ -65,64 +55,34 @@ const availableItems: Item[] = [
   },
 ];
 
-// ──────────────────────────────────────────────────────────────────────
-// UPDATE LOGIC
-// ──────────────────────────────────────────────────────────────────────
-
-// Update counter display and upgrade buttons
-const updateDisplay = (): void => {
-  counterDisplay.textContent = `${counter.toFixed(1)} stars (${
-    growthRate.toFixed(1)
-  } stars/sec)`;
-
-  availableItems.forEach((item) => {
-    if (item.button) {
-      // Enable button only if enough stars are available
-      item.button.disabled = counter < item.purchaseCost;
-
-      // Include item description directly in the button
-      item.button.textContent = `Buy ${item.name} (${
-        item.purchaseCost.toFixed(1)
-      } stars) — Owned: ${item.count}\n${item.description}`;
-      item.button.style.whiteSpace = "pre-wrap";
-      item.button.style.textAlign = "center";
-    }
-  });
-};
-
-// ──────────────────────────────────────────────────────────────────────
-// DOM & PAGE SETUP
-// ──────────────────────────────────────────────────────────────────────
-
-// Style the body
+// ─────────────────────────────────────────────
+// DOM SETUP
+// ─────────────────────────────────────────────
 document.body.style.margin = "0";
 document.body.style.display = "flex";
 document.body.style.flexDirection = "column";
-document.body.style.justifyContent = "center";
 document.body.style.alignItems = "center";
+document.body.style.justifyContent = "center";
 document.body.style.minHeight = "100vh";
 document.body.style.fontFamily = "Arial, Helvetica, sans-serif";
 document.body.style.color = "white";
 document.body.style.background =
   "linear-gradient(270deg, #1b003a, #240046, #3c096c)";
 document.body.style.backgroundSize = "600% 600%";
-
-// Animate background gradient
 document.body.animate(
-  [
-    { backgroundPosition: "0% 50%" },
-    { backgroundPosition: "100% 50%" },
-    { backgroundPosition: "0% 50%" },
-  ],
+  [{ backgroundPosition: "0% 50%" }, { backgroundPosition: "100% 50%" }, {
+    backgroundPosition: "0% 50%",
+  }],
   { duration: 2000, iterations: Infinity },
 );
 
-// Counter and growth rate display elements
+// Counter display
 const counterDisplay = document.createElement("div");
 counterDisplay.style.fontSize = "24px";
 counterDisplay.style.textAlign = "center";
 document.body.appendChild(counterDisplay);
 
+// Growth rate display
 const growthDisplay = document.createElement("div");
 growthDisplay.style.fontSize = "18px";
 growthDisplay.style.textAlign = "center";
@@ -137,49 +97,62 @@ clickButton.style.padding = "0";
 clickButton.style.marginBottom = "16px";
 clickButton.style.cursor = "pointer";
 
+// ✅ Image must be in `public/assets/`
 const buttonImage = document.createElement("img");
-buttonImage.src = "./assets/star_button.png";
+buttonImage.src = "/assets/star_button.png"; // Correct: public/assets/star_button.png
 buttonImage.alt = "Click to collect stardust";
 buttonImage.style.width = "800px";
 buttonImage.style.height = "200px";
 buttonImage.style.objectFit = "contain";
 buttonImage.style.transition = "transform 0.1s ease, filter 0.1s ease";
-
 clickButton.appendChild(buttonImage);
 document.body.appendChild(clickButton);
 
-// Container for upgrade buttons
+// Upgrade container
 const upgradeContainer = document.createElement("div");
 upgradeContainer.style.display = "flex";
 upgradeContainer.style.flexDirection = "column";
 upgradeContainer.style.alignItems = "center";
 document.body.appendChild(upgradeContainer);
 
-// ──────────────────────────────────────────────────────────────────────
-// MUSIC SETUP
-// ──────────────────────────────────────────────────────────────────────
-
-const bgMusic = new Audio("./assets/music.mp3");
+// ─────────────────────────────────────────────
+// MUSIC
+// ─────────────────────────────────────────────
+const bgMusic = new Audio("/assets/music.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.3;
-
-// Attempt to autoplay music
 globalThis.addEventListener("load", () => {
-  bgMusic.play().catch(() => {
-    console.log("Autoplay blocked; music will start after first click.");
-  });
+  bgMusic.play().catch(() =>
+    console.log("Autoplay blocked; will start after first click.")
+  );
 });
-
-// Resume background music on first user interaction (autoplay workaround)
 document.body.addEventListener("click", () => {
   if (bgMusic.paused) bgMusic.play();
 }, { once: true });
 
-// ──────────────────────────────────────────────────────────────────────
-// EVENT LISTENERS
-// ──────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// UPDATE DISPLAY
+// ─────────────────────────────────────────────
+const updateDisplay = (): void => {
+  counterDisplay.textContent = `${counter.toFixed(1)} stars (${
+    growthRate.toFixed(1)
+  } stars/sec)`;
 
-// Visual feedback for click button
+  availableItems.forEach((item) => {
+    if (item.button) {
+      item.button.disabled = counter < item.purchaseCost;
+      item.button.textContent = `Buy ${item.name} (${
+        item.purchaseCost.toFixed(1)
+      } stars)\nOwned: ${item.count}\n${item.description}`;
+      item.button.style.whiteSpace = "pre-wrap";
+      item.button.style.textAlign = "center";
+    }
+  });
+};
+
+// ─────────────────────────────────────────────
+// EVENT LISTENERS
+// ─────────────────────────────────────────────
 clickButton.addEventListener(
   "mouseover",
   () => buttonImage.style.transform = "scale(1.1)",
@@ -188,39 +161,24 @@ clickButton.addEventListener(
   "mouseout",
   () => buttonImage.style.transform = "scale(1)",
 );
-clickButton.addEventListener(
-  "mouseover",
-  () => buttonImage.style.filter = "brightness(70%)",
-);
-clickButton.addEventListener(
-  "mouseout",
-  () => buttonImage.style.filter = "brightness(100%)",
-);
 clickButton.addEventListener("mousedown", () => {
   buttonImage.style.transform = "scale(0.95)";
   buttonImage.style.filter = "brightness(50%)";
 });
 clickButton.addEventListener("mouseup", () => {
   buttonImage.style.transform = "scale(1)";
-  buttonImage.style.filter = "brightness(70%)";
-});
-clickButton.addEventListener("mouseleave", () => {
-  buttonImage.style.transform = "scale(1)";
   buttonImage.style.filter = "brightness(100%)";
 });
-
-// Click button logic
 clickButton.addEventListener("click", () => {
   counter++;
   updateDisplay();
 });
 
-// Setup upgrade buttons
+// Upgrade buttons
 availableItems.forEach((item) => {
   const btn = document.createElement("button");
   btn.style.margin = "6px";
   btn.style.width = "420px";
-  btn.style.minWidth = "420px";
   btn.style.padding = "10px 16px";
   btn.style.fontSize = "16px";
   btn.disabled = true;
@@ -232,19 +190,15 @@ availableItems.forEach((item) => {
       counter -= item.purchaseCost;
       item.count++;
       growthRate += item.rate;
-
-      // Increase purchase cost by 15% after each purchase
       item.purchaseCost = parseFloat((item.purchaseCost * 1.15).toFixed(2));
       updateDisplay();
     }
   });
 });
 
-// ──────────────────────────────────────────────────────────────────────
-// SHOOTING STAR EFFECT
-// ──────────────────────────────────────────────────────────────────────
-
-// Spawn a shooting star at a random position
+// ─────────────────────────────────────────────
+// SHOOTING STARS
+// ─────────────────────────────────────────────
 const spawnShootingStar = (): void => {
   const star = document.createElement("div");
   star.textContent = "⭐";
@@ -255,37 +209,27 @@ const spawnShootingStar = (): void => {
   star.style.opacity = "0.8";
   star.style.pointerEvents = "none";
   star.style.transition = "transform 1s linear, opacity 1s ease-out";
-
   document.body.appendChild(star);
-
   requestAnimationFrame(() => {
     star.style.transform = `translate(${Math.random() * 200 - 100}px, ${
       globalThis.innerHeight + 50
     }px) rotate(45deg)`;
     star.style.opacity = "0";
   });
-
   setTimeout(() => star.remove(), 1000);
 };
 
-// ──────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 // GAME LOOP
-// ──────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+const gameLoop = (time: number): void => {
+  const delta = (time - lastTime) / 1000;
+  lastTime = time;
+  counter += growthRate * delta;
 
-const gameLoop = (currentTime: number): void => {
-  const deltaTime = (currentTime - lastTime) / 1000;
-  lastTime = currentTime;
-
-  // Apply passive growth
-  counter += growthRate * deltaTime;
-
-  // Spawn shooting stars based on growth rate (max 80 per interval)
-  if (currentTime - lastSpawnCheck >= 2000) {
-    lastSpawnCheck = currentTime;
-
-    let starsToSpawn = Math.floor(growthRate);
-    if (starsToSpawn > 80) starsToSpawn = 80;
-
+  if (time - lastSpawnCheck >= 2000) {
+    lastSpawnCheck = time;
+    let starsToSpawn = Math.min(Math.floor(growthRate), 80);
     for (let i = 0; i < starsToSpawn; i++) {
       setTimeout(spawnShootingStar, i * 100);
     }
@@ -294,10 +238,6 @@ const gameLoop = (currentTime: number): void => {
   updateDisplay();
   requestAnimationFrame(gameLoop);
 };
-
-// ──────────────────────────────────────────────────────────────────────
-// INITIALIZATION
-// ──────────────────────────────────────────────────────────────────────
 
 updateDisplay();
 requestAnimationFrame(gameLoop);

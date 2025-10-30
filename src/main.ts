@@ -100,7 +100,7 @@ clickButton.style.cursor = "pointer";
 
 // ✅ Image must be in `public/assets/`
 const buttonImage = document.createElement("img");
-buttonImage.src = "/assets/star_button.png"; // Correct: public/assets/star_button.png
+buttonImage.src = "./assets/star_button.png"; // Correct: public/assets/star_button.png
 buttonImage.alt = "Click to collect stardust";
 buttonImage.style.width = "800px";
 buttonImage.style.height = "200px";
@@ -119,7 +119,7 @@ document.body.appendChild(upgradeContainer);
 // ─────────────────────────────────────────────
 // MUSIC
 // ─────────────────────────────────────────────
-const bgMusic = new Audio("/assets/music.mp3");
+const bgMusic = new Audio("./assets/music.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.3;
 globalThis.addEventListener("load", () => {
